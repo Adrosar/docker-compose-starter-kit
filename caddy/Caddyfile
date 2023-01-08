@@ -1,0 +1,51 @@
+{
+	#debug
+	admin off
+	#auto_https off
+	http_port 80
+	https_port 443
+}
+
+:80 {
+  redir * https://{host}{uri} 307
+}
+
+:443 {
+	tls internal
+	tls /tls/crt.pem /tls/key.pem
+
+	handle_path /nodejs {
+		reverse_proxy nodejs:80
+	}
+
+	handle_path /nodejs/* {
+		reverse_proxy nodejs:80
+	}
+
+	handle_path /portainer {
+		reverse_proxy portainer:9000
+	}
+
+	handle_path /portainer/* {
+		reverse_proxy portainer:9000
+	}
+	
+	redir /runtime.*.js  /portainer{path}{query} 307
+	redir /runtime.*.css /portainer{path}{query} 307
+
+	redir /main.*.js  /portainer{path}{query} 307
+	redir /main.*.css /portainer{path}{query} 307
+
+	redir /vendor.*.js  /portainer{path}{query} 307
+	redir /vendor.*.css /portainer{path}{query} 307
+
+	redir /locales/*/translation.json /portainer{path}{query} 307
+
+	handle_path /* {
+		root * /srv
+		file_server {
+			hide .git
+			precompressed zstd br gzip
+		}
+	}
+}
