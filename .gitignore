@@ -1,0 +1,5 @@
+/portainer/data
+!/portainer/data/_
+
+/scripts
+!scripts/*.sh
